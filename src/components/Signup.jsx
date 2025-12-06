@@ -1,6 +1,67 @@
+import {isEmail,isNotEmpty,isEqualToOtherValue,hasMinLength} from '../util/validation.js';
+import { useActionState } from 'react';
 export default function Signup() {
+  
+  function signUpAction(prev,formData){
+const email=formData.get('email');
+const password=formData.get('password');
+const confirmPassword=formData.get('confirm-password');
+const firstName=formData.get('first-name')
+const lastName=formData.get('last-name');
+const role=formData.get('role');
+const terms=formData.get('terms');
+const aquisitonChannel=formData.getAll('acquisition');
+
+let errors=[];
+
+if(!isEmail(email)){
+errors.push('invalid email address');
+}
+
+if(!isNotEmpty(password) || !hasMinLength(password,6)){
+errors.push('you must provide a password atleast 6 characters');
+
+}
+
+if(!isEqualToOtherValue(password,confirmPassword)){
+  errors.push('password do not match');
+
+}
+
+if(!isNotEmpty(firstName) || !isNotEmpty(lastName)){
+errors.push('please provide both of your Names')
+}
+
+if(!isNotEmpty(role)){
+errors.push('please select a role');
+}
+ 
+if(!terms){
+  errors.push('You must agree to the terms and conditions');
+}
+
+if(aquisitonChannel.length===0){
+errors.push('please select atleast one acqusition channel');
+}
+
+if(errors.length>0){
+return{errors};
+
+}
+
+return {errors:null}
+
+
+}
+
+const [formState,formAction]=useActionState(signUpAction, {
+  errors:null,
+});
+  
+
+
   return (
-    <form>
+    <form action={formAction}>
       <h2>Welcome on board!</h2>
       <p>We just need a little bit of data from you to get you started 🚀</p>
 
@@ -84,6 +145,14 @@ export default function Signup() {
           agree to the terms and conditions
         </label>
       </div>
+
+{formState.errors && <ul className='error'>{formState.errors.map((error)=>(
+  
+  <li key={error}>{error}</li>
+))}
+
+ </ul>}
+
 
       <p className="form-actions">
         <button type="reset" className="button button-flat">
